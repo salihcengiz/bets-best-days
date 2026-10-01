@@ -52,6 +52,7 @@
 		07F2018D306EAED500EB41B1 /* Exceptions for "BetsBestDays" folder in "BetsBestDaysWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Shared/BetContent.swift,
 				Shared/Models.swift,
 				Shared/Theme.swift,
 			);
