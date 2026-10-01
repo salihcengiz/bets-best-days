@@ -53,6 +53,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Shared/BetContent.swift,
+				Shared/DateLogic.swift,
 				Shared/Models.swift,
 				Shared/Theme.swift,
 			);
