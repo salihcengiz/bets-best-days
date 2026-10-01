@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# Xcode user specific files
+xcuserdata/
+*.xcuserstate
+
+# Compilation outputs
+DerivedData/
+build/
+
+# Personal content (public repository; this should never be committed)
+# Template: src/BetsBestDays/Config/BetContent.example.swift
+src/BetsBestDays/BetsBestDays/Shared/BetContent.swift
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Docs
+docs/
+
+# Claude Code user settings
+CLAUDE.md
