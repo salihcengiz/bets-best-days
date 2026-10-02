@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Special-day content that replaces the countdowns for the whole day:
-/// today's date on the regular background, then one orange card per special day.
-/// The app's header and footer are provided by the root view, not here.
+/// Special-day block that replaces the countdowns for the whole day:
+/// today's date, then one orange card per special day.
+/// It is a plain block: the parent view provides scrolling, padding and background.
 struct CelebrationView: View {
     /// Special days falling on `now`. Usually one; both if they share a date.
     let days: [SpecialDay]
@@ -11,22 +11,17 @@ struct CelebrationView: View {
     @Environment(DataStore.self) private var store
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: Theme.spacingM) {
-                Text(DateLogic.longDateText(now).uppercased(with: Locale(identifier: "tr_TR")))
-                    .font(Theme.unitLabelFont)
-                    .tracking(Theme.unitLabelTracking)
-                    .foregroundStyle(Theme.textSecondary)
+        VStack(alignment: .leading, spacing: Theme.spacingM) {
+            Text(DateLogic.longDateText(now).uppercased(with: Locale(identifier: "tr_TR")))
+                .font(Theme.unitLabelFont)
+                .tracking(Theme.unitLabelTracking)
+                .foregroundStyle(Theme.textSecondary)
 
-                ForEach(days, id: \.self) { day in
-                    card(for: day)
-                }
+            ForEach(days, id: \.self) { day in
+                card(for: day)
             }
-            .padding(Theme.spacingL)
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .scrollBounceBehavior(.basedOnSize)
-        .background(Theme.background)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// Orange card with a heading and the personal message for one special day.
@@ -72,10 +67,17 @@ struct CelebrationView: View {
 #Preview("Birthday") {
     CelebrationView(days: [.birthday], now: .now)
         .environment(DataStore())
+        .padding(Theme.spacingL)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .background(Theme.background)
 }
 
 #Preview("Both days, dark") {
-    CelebrationView(days: [.birthday, .anniversary], now: .now)
-        .environment(DataStore())
-        .preferredColorScheme(.dark)
+    ScrollView {
+        CelebrationView(days: [.birthday, .anniversary], now: .now)
+            .environment(DataStore())
+            .padding(Theme.spacingL)
+    }
+    .background(Theme.background)
+    .preferredColorScheme(.dark)
 }
