@@ -18,6 +18,8 @@ final class DataStore {
     let welcomeTitle = BetContent.welcomeTitle
     let welcomeMessage = BetContent.welcomeMessage
     let playlistURL = BetContent.playlistURL
+    /// The app shows only the lock screen until this moment.
+    let appUnlockDate = BetContent.appUnlockDate
 
     /// Sorted by unlock date, earliest first.
     let notes: [SurpriseNote] = BetContent.notes.sorted { $0.unlockDate < $1.unlockDate }
@@ -28,6 +30,8 @@ final class DataStore {
     private(set) var readNoteIDs: Set<UUID> = []
     /// Coupon ID to the moment it was redeemed.
     private(set) var redeemedCoupons: [UUID: Date] = [:]
+    /// Whether the welcome screen has been shown once after the app unlocked.
+    private(set) var hasSeenWelcome = false
 
     @ObservationIgnored private let defaults: UserDefaults
 
@@ -35,6 +39,19 @@ final class DataStore {
         self.defaults = defaults
         readNoteIDs = load(Set<UUID>.self, forKey: Keys.readNotes) ?? []
         redeemedCoupons = load([UUID: Date].self, forKey: Keys.redeemedCoupons) ?? [:]
+        hasSeenWelcome = defaults.bool(forKey: Keys.hasSeenWelcome)
+    }
+
+    // MARK: - App lock and welcome
+
+    func isAppLocked(now: Date) -> Bool {
+        now < appUnlockDate
+    }
+
+    func markWelcomeSeen() {
+        guard !hasSeenWelcome else { return }
+        hasSeenWelcome = true
+        defaults.set(true, forKey: Keys.hasSeenWelcome)
     }
 
     // MARK: - Notes
@@ -76,6 +93,7 @@ final class DataStore {
     private enum Keys {
         static let readNotes = "readNoteIDs"
         static let redeemedCoupons = "redeemedCoupons"
+        static let hasSeenWelcome = "hasSeenWelcome"
     }
 
     private func load<T: Decodable>(_ type: T.Type, forKey key: String) -> T? {
