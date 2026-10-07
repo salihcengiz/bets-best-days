@@ -55,30 +55,24 @@ enum NotificationManager {
     }
 
     /// Every upcoming notification, soonest first, capped at the iOS limit.
-    /// - Birthday and anniversary: 7 days before, 1 day before, and on the day (this year and next).
-    /// - Surprise notes: on the unlock day.
-    /// All fire at the configured morning time; anything already in the past is skipped.
+    /// - Birthday: only on the day itself, at 00:00 (this year and next).
+    /// - Anniversary: 7 days and 1 day before at the configured morning time,
+    ///   and on the day itself at 00:00 (this year and next).
+    /// - Surprise notes: the morning they unlock.
+    /// Anything already in the past is skipped.
     static func plan(store: DataStore, now: Date) -> [Plan] {
         var plans: [Plan] = []
         let calendar = Calendar.app
 
-        // Birthday: the next occurrence and the one after it.
+        // Birthday: the next occurrence and the one after it, at midnight.
         let nextBirthday = DateLogic.nextOccurrence(of: store.birthDate, from: now)
         let birthdays = [nextBirthday,
                          DateLogic.occurrence(of: store.birthDate, in: calendar.component(.year, from: nextBirthday) + 1)]
         for day in birthdays {
-            let key = "birthday-\(calendar.component(.year, from: day))"
-            plans += [
-                Plan(id: "\(key)-7", date: morning(of: day, daysBefore: 7),
-                     title: "Doğum gününe 7 gün kaldı",
-                     body: DateLogic.longDateText(day)),
-                Plan(id: "\(key)-1", date: morning(of: day, daysBefore: 1),
-                     title: "Yarın senin günün",
-                     body: "Doğum gününe 1 gün kaldı."),
-                Plan(id: "\(key)-0", date: morning(of: day, daysBefore: 0),
-                     title: "Doğum Günün Kutlu Olsun",
-                     body: store.birthdayMessage),
-            ]
+            plans.append(Plan(id: "birthday-\(calendar.component(.year, from: day))",
+                              date: midnight(of: day),
+                              title: "Doğum Günün Kutlu Olsun",
+                              body: store.birthdayMessage))
         }
 
         // Anniversary: the next occurrence and the one after it (never the start day itself).
@@ -97,7 +91,7 @@ enum NotificationManager {
                 Plan(id: "\(key)-1", date: morning(of: day, daysBefore: 1),
                      title: "Yarın \(number). yıl dönümümüz",
                      body: "Yıl dönümümüze 1 gün kaldı."),
-                Plan(id: "\(key)-0", date: morning(of: day, daysBefore: 0),
+                Plan(id: "\(key)-0", date: midnight(of: day),
                      title: "\(number). Yıl Dönümümüz Kutlu Olsun",
                      body: store.anniversaryMessage),
             ]
@@ -117,6 +111,11 @@ enum NotificationManager {
                 .sorted { $0.date < $1.date }
                 .prefix(pendingLimit)
         )
+    }
+
+    /// 00:00 at the start of `day`.
+    private static func midnight(of day: Date) -> Date {
+        Calendar.app.startOfDay(for: day)
     }
 
     /// The configured morning time, `daysBefore` days before `day`.
