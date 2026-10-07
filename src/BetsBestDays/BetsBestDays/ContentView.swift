@@ -77,8 +77,10 @@ struct ContentView: View {
         switch tab {
         case .home:
             HomeView()
-        case .notes, .coupons:
-            // Placeholder until the notes (#14) and coupons (#16) screens are connected.
+        case .notes:
+            NotesView()
+        case .coupons:
+            // Placeholder until the coupons screen (#16) is connected.
             Text("Bu bölüm hazırlanıyor.")
                 .font(Theme.bodyFont)
                 .foregroundStyle(Theme.textSecondary)
