@@ -80,12 +80,7 @@ struct ContentView: View {
         case .notes:
             NotesView()
         case .coupons:
-            // Placeholder until the coupons screen (#16) is connected.
-            Text("Bu bölüm hazırlanıyor.")
-                .font(Theme.bodyFont)
-                .foregroundStyle(Theme.textSecondary)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .padding(Theme.spacingL)
+            CouponsView()
         }
     }
 
