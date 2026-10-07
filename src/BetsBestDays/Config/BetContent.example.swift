@@ -25,6 +25,10 @@ nonisolated enum BetContent {
     /// The day the relationship started. Anniversaries repeat on this month and day.
     static let relationshipStart: Date = .day(2024, 1, 1) // TODO: fill in
 
+    /// Until this moment the whole app shows only the lock screen with a countdown.
+    /// Set it to a past date to disable the lock.
+    static let appUnlockDate: Date = .day(2000, 1, 1) // TODO: fill in
+
     // MARK: - Messages
 
     /// Shown on the full-screen card for the whole birthday.
