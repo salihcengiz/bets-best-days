@@ -28,7 +28,7 @@ private struct HomeContent: View {
         let specialDays = DateLogic.specialDays(on: now)
 
         ScrollView {
-            VStack(alignment: .leading, spacing: Theme.spacingL) {
+            VStack(alignment: .leading, spacing: Theme.spacingM) {
                 if specialDays.isEmpty {
                     togetherSection
                     divider
@@ -62,14 +62,14 @@ private struct HomeContent: View {
 
     /// Heading, the screen's single large number (days together) and the breakdown.
     private var togetherSection: some View {
-        VStack(alignment: .leading, spacing: Theme.spacingM) {
+        VStack(alignment: .leading, spacing: Theme.spacingXS) {
             Text("Birlikte")
                 .font(Theme.headlineFont)
                 .foregroundStyle(Theme.textPrimary)
 
             HStack(alignment: .firstTextBaseline, spacing: Theme.spacingS) {
                 Text("\(DateLogic.daysTogether(now))")
-                    .font(Theme.countdownFont(size: 72))
+                    .font(Theme.countdownFont(size: 64))
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
                 Text("gün")
