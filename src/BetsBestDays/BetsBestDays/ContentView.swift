@@ -35,6 +35,7 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
+                .zIndex(1)
             sectionTitle
 
             screen(for: selectedTab)
@@ -43,6 +44,7 @@ struct ContentView: View {
                 .transition(.opacity)
 
             footer
+                .zIndex(1)
         }
         .animation(.easeInOut(duration: 0.2), value: selectedTab)
         .background(Theme.background.ignoresSafeArea())
@@ -63,7 +65,8 @@ struct ContentView: View {
             .frame(maxWidth: .infinity)
             .padding(.top, Theme.spacingS)
             .padding(.bottom, Theme.spacingM)
-            .background(Theme.accent.ignoresSafeArea(edges: .top))
+            // Small neutral shadow on the band only (not the text), falling onto the content below.
+            .background(Theme.accent.ignoresSafeArea(edges: .top).shadow(radius: 2, y: 2))
             .accessibilityAddTraits(.isHeader)
     }
 
@@ -100,9 +103,11 @@ struct ContentView: View {
                 footerButton(for: tab)
             }
         }
+        .padding(.horizontal, Theme.spacingS)
         .padding(.top, Theme.spacingS)
         .padding(.bottom, Theme.spacingXS)
-        .background(Theme.accent.ignoresSafeArea(edges: .bottom))
+        // Small neutral shadow on the band only, falling onto the content above.
+        .background(Theme.accent.ignoresSafeArea(edges: .bottom).shadow(radius: 2, y: -2))
     }
 
     private func footerButton(for tab: AppTab) -> some View {
@@ -117,7 +122,8 @@ struct ContentView: View {
                 Text(tab.title)
                     .font(.system(size: 11, weight: isSelected ? .semibold : .medium))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .minimumScaleFactor(0.6)
+                    .padding(.horizontal, 2)
             }
             .foregroundStyle(Theme.onAccent.opacity(isSelected ? 1 : 0.65))
             .frame(maxWidth: .infinity)
