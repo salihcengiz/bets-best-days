@@ -29,6 +29,15 @@ nonisolated enum BetContent {
     /// Set it to a past date to disable the lock.
     static let appUnlockDate: Date = .day(2000, 1, 1) // TODO: fill in
 
+    /// The exact anniversary day is unknown: until it is picked with the wheel, the
+    /// anniversary card shows a "pick" button. The wheel offers these days of the
+    /// relationship start month; the year comes from `relationshipStart`.
+    static let anniversaryDayChoices: ClosedRange<Int> = 1...9
+
+    /// App Group shared by the app and the widget, so the widget can read the picked day.
+    /// Must match the App Groups capability of both targets.
+    static let appGroupID = "group.com.example.BetsBestDays" // TODO: fill in
+
     // MARK: - Messages
 
     /// Shown on the full-screen card for the whole birthday.
@@ -37,7 +46,7 @@ nonisolated enum BetContent {
     /// Shown on the full-screen card for the whole anniversary day.
     static let anniversaryMessage = "Happy anniversary!" // TODO: fill in
 
-    /// First-launch welcome screen, which also asks for notification permission.
+    /// Welcome screen, shown once right after the app unlocks.
     static let welcomeTitle = "Welcome" // TODO: fill in
     static let welcomeMessage = "A short, personal welcome message." // TODO: fill in
 
