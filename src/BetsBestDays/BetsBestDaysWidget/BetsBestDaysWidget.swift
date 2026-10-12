@@ -8,77 +8,100 @@
 import WidgetKit
 import SwiftUI
 
-struct Provider: TimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), emoji: "😀")
-    }
+// The three widget kinds shown in the widget gallery. All share DaysProvider,
+// so they switch to the next day exactly at midnight.
 
-    func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date(), emoji: "😀")
-        completion(entry)
-    }
-
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        var entries: [SimpleEntry] = []
-
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, emoji: "😀")
-            entries.append(entry)
-        }
-
-        let timeline = Timeline(entries: entries, policy: .atEnd)
-        completion(timeline)
-    }
-
-//    func relevances() async -> WidgetRelevances<Void> {
-//        // Generate a list containing the contexts this widget is relevant in.
-//    }
-}
-
-struct SimpleEntry: TimelineEntry {
-    let date: Date
-    let emoji: String
-}
-
-struct BetsBestDaysWidgetEntryView : View {
-    var entry: Provider.Entry
-
-    var body: some View {
-        VStack {
-            Text("Time:")
-            Text(entry.date, style: .time)
-
-            Text("Emoji:")
-            Text(entry.emoji)
-        }
-    }
-}
-
+/// Overview: birthday, anniversary and days together.
+/// Keeps the template's type name so the bundle keeps compiling.
 struct BetsBestDaysWidget: Widget {
-    let kind: String = "BetsBestDaysWidget"
+    let kind = "OverviewWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            if #available(iOS 17.0, *) {
-                BetsBestDaysWidgetEntryView(entry: entry)
-                    .containerBackground(.fill.tertiary, for: .widget)
-            } else {
-                BetsBestDaysWidgetEntryView(entry: entry)
-                    .padding()
-                    .background()
-            }
+        StaticConfiguration(kind: kind, provider: DaysProvider()) { entry in
+            OverviewWidgetView(entry: entry)
         }
-        .configurationDisplayName("My Widget")
-        .description("This is an example widget.")
+        .configurationDisplayName("Özet")
+        .description("Doğum günü, yıl dönümü ve birlikte geçen günler.")
+        .supportedFamilies([.systemMedium, .accessoryRectangular])
     }
 }
 
-#Preview(as: .systemSmall) {
+/// The closest special day: days left, or a celebration on the day itself.
+struct SpecialDayWidget: Widget {
+    let kind = "SpecialDayWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: DaysProvider()) { entry in
+            SpecialDayWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Özel Gün")
+        .description("En yakın özel güne kalan gün.")
+        .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryInline])
+    }
+}
+
+/// Days together since the relationship started.
+struct TogetherWidget: Widget {
+    let kind = "TogetherWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: DaysProvider()) { entry in
+            TogetherWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Birlikte")
+        .description("Birlikte geçen günler.")
+        .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryInline])
+    }
+}
+
+// MARK: - Previews
+// Entries are computed from the local content file at runtime: today, and the next
+// special day itself (to see the celebration state).
+
+private var previewEntries: [DaysEntry] {
+    let now = Date()
+    let special = DateLogic.nextSpecialDay(from: now).date
+    return [DaysEntry(date: now), DaysEntry(date: special.addingTimeInterval(10 * 3600))]
+}
+
+#Preview("Special day, small", as: .systemSmall) {
+    SpecialDayWidget()
+} timeline: {
+    for entry in previewEntries { entry }
+}
+
+#Preview("Special day, circular", as: .accessoryCircular) {
+    SpecialDayWidget()
+} timeline: {
+    for entry in previewEntries { entry }
+}
+
+#Preview("Special day, inline", as: .accessoryInline) {
+    SpecialDayWidget()
+} timeline: {
+    for entry in previewEntries { entry }
+}
+
+#Preview("Together, small", as: .systemSmall) {
+    TogetherWidget()
+} timeline: {
+    DaysEntry(date: .now)
+}
+
+#Preview("Together, circular", as: .accessoryCircular) {
+    TogetherWidget()
+} timeline: {
+    DaysEntry(date: .now)
+}
+
+#Preview("Overview, medium", as: .systemMedium) {
     BetsBestDaysWidget()
 } timeline: {
-    SimpleEntry(date: .now, emoji: "😀")
-    SimpleEntry(date: .now, emoji: "🤩")
+    for entry in previewEntries { entry }
+}
+
+#Preview("Overview, rectangular", as: .accessoryRectangular) {
+    BetsBestDaysWidget()
+} timeline: {
+    DaysEntry(date: .now)
 }
