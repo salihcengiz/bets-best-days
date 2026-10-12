@@ -56,6 +56,37 @@ nonisolated enum DateLogic {
         (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
     }
 
+    // MARK: - Relationship start (anniversary day picked with the wheel)
+
+    /// UserDefaults key for the anniversary day picked with the wheel (1...9).
+    static let pickedAnniversaryDayKey = "pickedAnniversaryDay"
+
+    /// Storage shared by the app and the widget through the App Group.
+    /// Without the App Group entitlement this still works, but only inside the app.
+    static var sharedDefaults: UserDefaults {
+        UserDefaults(suiteName: BetContent.appGroupID) ?? .standard
+    }
+
+    /// The day picked with the wheel, or nil if it has not been picked yet.
+    static func pickedAnniversaryDay(in defaults: UserDefaults = sharedDefaults) -> Int? {
+        guard let day = defaults.object(forKey: pickedAnniversaryDayKey) as? Int,
+              BetContent.anniversaryDayChoices.contains(day) else { return nil }
+        return day
+    }
+
+    /// Start date for a picked day: that day of the content's start month and year.
+    /// Without a pick, the start date from BetContent.
+    static func relationshipStart(pickedDay: Int?) -> Date {
+        guard let pickedDay else { return BetContent.relationshipStart }
+        let parts = calendar.dateComponents([.year, .month], from: BetContent.relationshipStart)
+        return .day(parts.year ?? 2000, parts.month ?? 1, pickedDay)
+    }
+
+    /// The effective relationship start used by every anniversary and together calculation.
+    static var relationshipStart: Date {
+        relationshipStart(pickedDay: pickedAnniversaryDay())
+    }
+
     // MARK: - Birthday
 
     static func nextBirthday(from now: Date) -> Date {
@@ -69,13 +100,13 @@ nonisolated enum DateLogic {
     // MARK: - Anniversary
 
     static func nextAnniversary(from now: Date) -> Date {
-        nextOccurrence(of: BetContent.relationshipStart, from: now)
+        nextOccurrence(of: relationshipStart, from: now)
     }
 
     /// Which anniversary falls on `anniversaryDate` (1 for the first one).
     static func anniversaryNumber(on anniversaryDate: Date) -> Int {
         calendar.component(.year, from: anniversaryDate)
-            - calendar.component(.year, from: BetContent.relationshipStart)
+            - calendar.component(.year, from: relationshipStart)
     }
 
     /// Number of the next (or today's) anniversary, e.g. 8 for the eighth.
@@ -105,8 +136,8 @@ nonisolated enum DateLogic {
         var anniversary = nextAnniversary(from: now)
         if anniversaryNumber(on: anniversary) < 1 {
             // The relationship starts today or later: skip to its first real anniversary.
-            anniversary = occurrence(of: BetContent.relationshipStart,
-                                     in: calendar.component(.year, from: BetContent.relationshipStart) + 1)
+            anniversary = occurrence(of: relationshipStart,
+                                     in: calendar.component(.year, from: relationshipStart) + 1)
         }
         return anniversary < birthday ? (.anniversary, anniversary) : (.birthday, birthday)
     }
@@ -132,12 +163,12 @@ nonisolated enum DateLogic {
 
     /// Days together: 0 on the start day itself.
     static func daysTogether(_ now: Date) -> Int {
-        max(0, daysUntil(now, from: BetContent.relationshipStart))
+        max(0, daysUntil(now, from: relationshipStart))
     }
 
     /// Time together as calendar years, months and days.
     static func togetherBreakdown(_ now: Date) -> DateBreakdown {
-        let start = calendar.startOfDay(for: BetContent.relationshipStart)
+        let start = calendar.startOfDay(for: relationshipStart)
         let end = calendar.startOfDay(for: now)
         guard end > start else { return DateBreakdown(years: 0, months: 0, days: 0) }
         let parts = calendar.dateComponents([.year, .month, .day], from: start, to: end)
