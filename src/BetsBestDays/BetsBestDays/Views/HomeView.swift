@@ -1,9 +1,9 @@
 import SwiftUI
 
 /// Content of the countdowns screen, in one scrolling column:
-/// - regular day: days together, the two countdowns (closest first), playlist button
-/// - special day: celebration cards in place of the countdowns, then days together and the playlist button
-/// The header and footer come from the root view.
+/// - regular day: days together, then the two countdown cards (closest first)
+/// - special day: celebration cards in place of the countdowns, then days together
+/// The header and footer come from the root view; the playlist has its own section.
 struct HomeView: View {
     /// Fixed moment for previews. In the app this is nil and the screen ticks every second.
     var fixedNow: Date? = nil
@@ -28,7 +28,7 @@ private struct HomeContent: View {
         let specialDays = DateLogic.specialDays(on: now)
 
         ScrollView {
-            VStack(alignment: .leading, spacing: Theme.spacingXL) {
+            VStack(alignment: .leading, spacing: Theme.spacingL) {
                 if specialDays.isEmpty {
                     togetherSection
                     divider
@@ -38,8 +38,6 @@ private struct HomeContent: View {
                     divider
                     togetherSection
                 }
-                PlaylistButton()
-                    .padding(.top, Theme.spacingS)
             }
             .padding(Theme.spacingL)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -47,21 +45,22 @@ private struct HomeContent: View {
         .background(Theme.background)
     }
 
-    /// Both countdowns with a divider between them.
+    /// Both countdown cards, stacked; their equal columns line up.
     private var countdownSections: some View {
-        ForEach(Array(countdowns.enumerated()), id: \.offset) { index, item in
-            if index > 0 { divider }
-            CountdownView(
-                title: item.title,
-                countdown: DateLogic.countdown(from: now, to: item.date),
-                dateText: DateLogic.longDateText(item.date)
-            )
+        VStack(spacing: Theme.spacingM) {
+            ForEach(countdowns, id: \.title) { item in
+                CountdownView(
+                    title: item.title,
+                    countdown: DateLogic.countdown(from: now, to: item.date),
+                    dateText: DateLogic.longDateText(item.date)
+                )
+            }
         }
     }
 
     // MARK: - Sections
 
-    /// Heading styled like the countdown titles, a large day count and the breakdown.
+    /// Heading, the screen's single large number (days together) and the breakdown.
     private var togetherSection: some View {
         VStack(alignment: .leading, spacing: Theme.spacingM) {
             Text("Birlikte")
@@ -70,7 +69,7 @@ private struct HomeContent: View {
 
             HStack(alignment: .firstTextBaseline, spacing: Theme.spacingS) {
                 Text("\(DateLogic.daysTogether(now))")
-                    .font(Theme.countdownFont(size: 64))
+                    .font(Theme.countdownFont(size: 72))
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
                 Text("gün")
