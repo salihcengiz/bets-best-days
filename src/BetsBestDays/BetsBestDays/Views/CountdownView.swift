@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// A live countdown block: a heading, four large orange numbers with small unit labels,
-/// and the target date underneath. The parent view decides when it refreshes.
+/// A live countdown card: heading, four equal-width columns (days, hours, minutes,
+/// seconds) and the target date. Equal columns keep stacked countdowns aligned even
+/// when one has a three-digit day count. The parent view decides when it refreshes.
 struct CountdownView: View {
     let title: String
     let countdown: Countdown
@@ -13,29 +14,35 @@ struct CountdownView: View {
                 .font(Theme.headlineFont)
                 .foregroundStyle(Theme.textPrimary)
 
-            HStack(alignment: .firstTextBaseline, spacing: Theme.spacingL) {
-                unit(countdown.days, label: "GÜN", padded: false)
-                unit(countdown.hours, label: "SAAT")
-                unit(countdown.minutes, label: "DAKİKA")
-                unit(countdown.seconds, label: "SANİYE")
+            HStack(spacing: 0) {
+                unit("\(countdown.days)", label: "GÜN")
+                unit(String(format: "%02d", countdown.hours), label: "SAAT")
+                unit(String(format: "%02d", countdown.minutes), label: "DAKİKA")
+                unit(String(format: "%02d", countdown.seconds), label: "SANİYE")
             }
 
             Text(dateText)
                 .font(Theme.captionFont)
                 .foregroundStyle(Theme.textSecondary)
         }
+        .padding(Theme.spacingM)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.cornerRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                .stroke(Theme.separator, lineWidth: Theme.borderWidth)
+        )
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
             "\(title): \(countdown.days) gün \(countdown.hours) saat \(countdown.minutes) dakika, \(dateText)"
         )
     }
 
-    /// One number with its label below. Hours, minutes and seconds are always two digits.
-    private func unit(_ value: Int, label: String, padded: Bool = true) -> some View {
-        VStack(alignment: .leading, spacing: Theme.spacingXS) {
-            Text(padded ? String(format: "%02d", value) : "\(value)")
-                .font(Theme.countdownFont(size: 48))
+    /// One column: number centered over its label. All four share the width equally.
+    private func unit(_ value: String, label: String) -> some View {
+        VStack(spacing: Theme.spacingXS) {
+            Text(value)
+                .font(Theme.countdownFont(size: 40))
                 .foregroundStyle(Theme.accent)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
@@ -44,13 +51,16 @@ struct CountdownView: View {
                 .font(Theme.unitLabelFont)
                 .tracking(Theme.unitLabelTracking)
                 .foregroundStyle(Theme.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
+        .frame(maxWidth: .infinity)
     }
 }
 
 // MARK: - Previews
 
-/// Ticks every second, counting down to the next birthday from the real content.
+/// Ticks every second, counting down to the next birthday from the local content.
 private struct LiveCountdownPreview: View {
     let store = DataStore()
 
@@ -78,12 +88,20 @@ private struct LiveCountdownPreview: View {
         .preferredColorScheme(.dark)
 }
 
-#Preview("Long numbers") {
-    CountdownView(
-        title: DateLogic.countdownTitle(for: .anniversary, anniversaryNumber: 2),
-        countdown: Countdown(days: 364, hours: 23, minutes: 59, seconds: 59),
-        dateText: DateLogic.longDateText(.day(2030, 1, 1))
-    )
+#Preview("Alignment: two and three digit days") {
+    VStack(spacing: Theme.spacingM) {
+        CountdownView(
+            title: DateLogic.countdownTitle(for: .birthday, anniversaryNumber: 0),
+            countdown: Countdown(days: 12, hours: 4, minutes: 5, seconds: 6),
+            dateText: DateLogic.longDateText(.day(2030, 1, 1))
+        )
+        CountdownView(
+            title: DateLogic.countdownTitle(for: .anniversary, anniversaryNumber: 2),
+            countdown: Countdown(days: 364, hours: 23, minutes: 59, seconds: 59),
+            dateText: DateLogic.longDateText(.day(2030, 6, 1))
+        )
+    }
     .padding(Theme.spacingL)
+    .frame(maxHeight: .infinity, alignment: .top)
     .background(Theme.background)
 }
