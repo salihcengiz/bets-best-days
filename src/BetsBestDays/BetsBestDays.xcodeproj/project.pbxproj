@@ -36,6 +36,7 @@
 
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* BetsBestDays.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BetsBestDays.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		07C22D75307D437B006A63C2 /* BetsBestDaysWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BetsBestDaysWidgetExtension.entitlements; sourceTree = "<group>"; };
 		07F2016F306E4C3C00EB41B1 /* BetsBestDaysWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BetsBestDaysWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		07F20171306E4C3C00EB41B1 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		07F20173306E4C3C00EB41B1 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -99,6 +100,7 @@
 		000000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				07C22D75307D437B006A63C2 /* BetsBestDaysWidgetExtension.entitlements */,
 				000000000000000000000010 /* BetsBestDays */,
 				07F20175306E4C3C00EB41B1 /* BetsBestDaysWidget */,
 				07F20170306E4C3C00EB41B1 /* Frameworks */,
@@ -375,6 +377,7 @@
 		000000000000000111000000 /* Debug configuration for PBXNativeTarget "BetsBestDays" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BetsBestDays/BetsBestDays.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NKS59GKBWK;
@@ -415,6 +418,7 @@
 		000000000000000112000000 /* Release configuration for PBXNativeTarget "BetsBestDays" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BetsBestDays/BetsBestDays.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NKS59GKBWK;
@@ -457,6 +461,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = BetsBestDaysWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NKS59GKBWK;
@@ -473,6 +478,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.salihcengiz.BetsBestDays.BetsBestDaysWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -493,6 +499,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = BetsBestDaysWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NKS59GKBWK;
@@ -509,6 +516,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.salihcengiz.BetsBestDays.BetsBestDaysWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

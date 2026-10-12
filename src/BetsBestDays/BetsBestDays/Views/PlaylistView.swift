@@ -7,7 +7,7 @@ struct PlaylistView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.spacingL) {
-                Text("Birlikte dinlediğimiz şarkıların listesi.")
+                Text("Birlikte dinlediğimiz şarkıların bir listesi.")
                     .font(Theme.bodyFont)
                     .foregroundStyle(Theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
