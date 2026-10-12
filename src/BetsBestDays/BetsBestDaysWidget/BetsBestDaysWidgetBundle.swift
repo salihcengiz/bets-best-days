@@ -11,6 +11,8 @@ import SwiftUI
 @main
 struct BetsBestDaysWidgetBundle: WidgetBundle {
     var body: some Widget {
+        SpecialDayWidget()
+        TogetherWidget()
         BetsBestDaysWidget()
     }
 }

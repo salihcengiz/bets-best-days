@@ -260,22 +260,26 @@ private func isLocked(_ entry: DaysEntry) -> Bool {
     entry.date < BetContent.appUnlockDate
 }
 
-/// Shown by every widget before the app unlocks.
+/// Shown by every widget before the app unlocks: the hours and minutes left.
+/// `Text(_:style: .relative)` is updated live by the system, so the widget needs no
+/// extra timeline entries; the midnight entry then swaps in the regular view.
 private struct LockedWidgetView: View {
     let entry: DaysEntry
     @Environment(\.widgetFamily) private var family
 
-    private var whenText: String {
-        DateLogic.daysLeftText(DateLogic.daysUntil(BetContent.appUnlockDate, from: entry.date))
+    /// Hours and minutes until the unlock moment, kept current by the system.
+    private var timeLeft: Text {
+        Text(BetContent.appUnlockDate, style: .relative)
     }
 
     var body: some View {
         switch family {
         case .accessoryInline:
-            Text("Sürprizin: \(whenText)")
+            Text("Sürprizine ") + timeLeft
         case .accessoryCircular:
-            Text(whenText)
-                .font(.system(size: 13, weight: .semibold))
+            timeLeft
+                .font(.system(size: 12, weight: .semibold))
+                .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.6)
                 .widgetAccentable()
         default:
@@ -285,9 +289,12 @@ private struct LockedWidgetView: View {
                     .foregroundStyle(Theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 0)
-                Text(whenText)
-                    .font(.system(size: 28, weight: .semibold))
+                timeLeft
+                    .font(.system(size: 26, weight: .semibold))
                     .foregroundStyle(Theme.accent)
+                    .monospacedDigit()
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.6)
                     .widgetAccentable()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
