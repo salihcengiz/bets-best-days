@@ -55,10 +55,10 @@ enum NotificationManager {
     }
 
     /// Every upcoming notification, soonest first, capped at the iOS limit.
-    /// - Birthday: only on the day itself, at 00:00 (this year and next).
-    /// - Anniversary: 7 days and 1 day before at the configured morning time,
-    ///   and on the day itself at 00:00 (this year and next).
-    /// - Surprise notes: the morning they unlock.
+    /// Every notification fires at 00:00:
+    /// - Birthday: only on the day itself (this year and next).
+    /// - Anniversary: 7 days before, 1 day before and on the day itself (this year and next).
+    /// - Surprise notes: the day they unlock.
     /// Anything already in the past is skipped.
     static func plan(store: DataStore, now: Date) -> [Plan] {
         var plans: [Plan] = []
@@ -85,10 +85,10 @@ enum NotificationManager {
             guard number >= 1 else { continue }
             let key = "anniversary-\(calendar.component(.year, from: day))"
             plans += [
-                Plan(id: "\(key)-7", date: morning(of: day, daysBefore: 7),
+                Plan(id: "\(key)-7", date: midnight(of: day, daysBefore: 7),
                      title: "\(number). yıl dönümümüze 7 gün kaldı",
                      body: DateLogic.longDateText(day)),
-                Plan(id: "\(key)-1", date: morning(of: day, daysBefore: 1),
+                Plan(id: "\(key)-1", date: midnight(of: day, daysBefore: 1),
                      title: "Yarın \(number). yıl dönümümüz",
                      body: "Yıl dönümümüze 1 gün kaldı."),
                 Plan(id: "\(key)-0", date: midnight(of: day),
@@ -97,10 +97,10 @@ enum NotificationManager {
             ]
         }
 
-        // Surprise notes: the morning they unlock.
+        // Surprise notes: midnight of the day they unlock.
         for note in store.notes {
             plans.append(Plan(id: "note-\(note.id.uuidString)",
-                              date: morning(of: note.unlockDate, daysBefore: 0),
+                              date: midnight(of: note.unlockDate),
                               title: "Bugün senin için bir sürpriz not açıldı",
                               body: "Notlar bölümünde seni bekliyor."))
         }
@@ -113,18 +113,10 @@ enum NotificationManager {
         )
     }
 
-    /// 00:00 at the start of `day`.
-    private static func midnight(of day: Date) -> Date {
-        Calendar.app.startOfDay(for: day)
-    }
-
-    /// The configured morning time, `daysBefore` days before `day`.
-    private static func morning(of day: Date, daysBefore: Int) -> Date {
+    /// 00:00 at the start of the day `daysBefore` days before `day`.
+    private static func midnight(of day: Date, daysBefore: Int = 0) -> Date {
         let calendar = Calendar.app
-        let start = calendar.date(byAdding: .day, value: -daysBefore, to: calendar.startOfDay(for: day)) ?? day
-        return calendar.date(bySettingHour: BetContent.notificationHour,
-                             minute: BetContent.notificationMinute,
-                             second: 0,
-                             of: start) ?? start
+        let start = calendar.startOfDay(for: day)
+        return calendar.date(byAdding: .day, value: -daysBefore, to: start) ?? start
     }
 }
