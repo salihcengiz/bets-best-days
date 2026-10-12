@@ -28,7 +28,11 @@ struct SpecialDayWidgetView: View {
         }
     }
 
-    private var next: (day: SpecialDay, date: Date) { DateLogic.nextSpecialDay(from: entry.date) }
+    /// Closest special day. Until the anniversary day is picked, only the birthday counts.
+    private var next: (day: SpecialDay, date: Date) {
+        guard isAnniversaryPicked() else { return (.birthday, DateLogic.nextBirthday(from: entry.date)) }
+        return DateLogic.nextSpecialDay(from: entry.date)
+    }
     private var daysLeft: Int { DateLogic.daysUntil(next.date, from: entry.date) }
     private var isToday: Bool { daysLeft == 0 }
     private var number: Int { DateLogic.anniversaryNumber(on: next.date) }
@@ -205,8 +209,10 @@ struct OverviewWidgetView: View {
         HStack(alignment: .top, spacing: Theme.spacingM) {
             column(DateLogic.countdownTitle(for: .birthday, anniversaryNumber: 0),
                    value: birthdayDays, isCountdown: true)
-            column(DateLogic.countdownTitle(for: .anniversary, anniversaryNumber: anniversaryNumber),
-                   value: anniversaryDays, isCountdown: true)
+            if isAnniversaryPicked() {
+                column(DateLogic.countdownTitle(for: .anniversary, anniversaryNumber: anniversaryNumber),
+                       value: anniversaryDays, isCountdown: true)
+            }
             column("Birlikte", value: togetherDays, isCountdown: false)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -233,7 +239,9 @@ struct OverviewWidgetView: View {
     private var rectangular: some View {
         VStack(alignment: .leading, spacing: 1) {
             row("Doğum günü", value: birthdayDays == 0 ? "Bugün" : "\(birthdayDays) gün")
-            row("\(anniversaryNumber). yıl dönümü", value: anniversaryDays == 0 ? "Bugün" : "\(anniversaryDays) gün")
+            if isAnniversaryPicked() {
+                row("\(anniversaryNumber). yıl dönümü", value: anniversaryDays == 0 ? "Bugün" : "\(anniversaryDays) gün")
+            }
             row("Birlikte", value: "\(togetherDays) gün")
         }
         .font(.system(size: 13))
@@ -254,6 +262,13 @@ struct OverviewWidgetView: View {
 }
 
 // MARK: - Shared pieces
+
+/// True once the anniversary day has been picked with the wheel in the app.
+/// Read from the App Group; without it the widget never sees the pick and keeps
+/// the anniversary hidden.
+private func isAnniversaryPicked() -> Bool {
+    DateLogic.pickedAnniversaryDay() != nil
+}
 
 /// True before the app unlocks; widgets then show only the surprise countdown.
 private func isLocked(_ entry: DaysEntry) -> Bool {
