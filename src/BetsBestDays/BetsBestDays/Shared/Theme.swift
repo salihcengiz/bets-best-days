@@ -1,3 +1,4 @@
+import CoreText
 import SwiftUI
 import UIKit
 
@@ -44,6 +45,19 @@ nonisolated enum Theme {
     /// Small unit labels next to numbers. Write the text in uppercase in the source.
     static let unitLabelFont = Font.system(size: 11, weight: .medium)
     static let unitLabelTracking: CGFloat = 1.2
+
+    /// Brand font (Boogaloo, SIL Open Font License, bundled in Fonts/). Used only for the
+    /// app name. Registered at first use, so no Info.plist entry is needed.
+    /// Falls back to the system font if the file is missing (e.g. in the widget).
+    static func brandFont(size: CGFloat) -> Font {
+        _ = registerBrandFont
+        return .custom("Boogaloo-Regular", size: size)
+    }
+
+    private static let registerBrandFont: Void = {
+        guard let url = Bundle.main.url(forResource: "Boogaloo-Regular", withExtension: "ttf") else { return }
+        CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+    }()
 
     static let titleFont = Font.system(size: 28, weight: .semibold)
     static let headlineFont = Font.system(size: 20, weight: .semibold)
