@@ -3,24 +3,37 @@ import SwiftUI
 /// Content of the countdowns screen, in one scrolling column:
 /// - regular day: days together, then the two countdown cards (closest first)
 /// - special day: celebration cards in place of the countdowns, then days together
+/// Until the anniversary day is picked, its card only offers the wheel.
 /// The header and footer come from the root view; the playlist has its own section.
 struct HomeView: View {
     /// Fixed moment for previews. In the app this is nil and the screen ticks every second.
     var fixedNow: Date? = nil
 
+    @State private var isWheelPresented = false
+
     var body: some View {
-        if let fixedNow {
-            HomeContent(now: fixedNow)
-        } else {
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                HomeContent(now: context.date)
+        Group {
+            if let fixedNow {
+                HomeContent(now: fixedNow, onPickAnniversary: openWheel)
+            } else {
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    HomeContent(now: context.date, onPickAnniversary: openWheel)
+                }
             }
         }
+        .sheet(isPresented: $isWheelPresented) {
+            AnniversaryWheelView()
+        }
+    }
+
+    private func openWheel() {
+        isWheelPresented = true
     }
 }
 
 private struct HomeContent: View {
     let now: Date
+    let onPickAnniversary: () -> Void
 
     @Environment(DataStore.self) private var store
 
@@ -45,7 +58,8 @@ private struct HomeContent: View {
         .background(Theme.background)
     }
 
-    /// Both countdown cards, stacked; their equal columns line up.
+    /// Countdown cards, stacked; their equal columns line up.
+    /// Before the anniversary day is picked, the anniversary card is the pick card.
     private var countdownSections: some View {
         VStack(spacing: Theme.spacingM) {
             ForEach(countdowns, id: \.title) { item in
@@ -55,7 +69,36 @@ private struct HomeContent: View {
                     dateText: DateLogic.longDateText(item.date)
                 )
             }
+            if !store.isAnniversaryDayPicked {
+                pickAnniversaryCard
+            }
         }
+    }
+
+    /// Card shown in place of the anniversary countdown until the wheel is spun.
+    private var pickAnniversaryCard: some View {
+        Button(action: onPickAnniversary) {
+            HStack {
+                Text("Yıl Dönümümüzü Belirle")
+                    .font(.system(size: 28, weight: .semibold))
+                    .foregroundStyle(Theme.accent)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: Theme.spacingS)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Theme.textSecondary)
+            }
+            .padding(Theme.spacingL)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.cornerRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                    .stroke(Theme.separator, lineWidth: Theme.borderWidth)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: Theme.cornerRadius))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Yıl Dönümümüzü Belirle")
     }
 
     // MARK: - Sections
@@ -92,16 +135,16 @@ private struct HomeContent: View {
 
     // MARK: - Data
 
-    /// Birthday and anniversary countdowns, the closest one first.
+    /// Birthday and (once picked) anniversary countdowns, the closest one first.
     private var countdowns: [(title: String, date: Date)] {
         let birthday = DateLogic.nextOccurrence(of: store.birthDate, from: now)
-        let anniversary = DateLogic.nextOccurrence(of: store.relationshipStart, from: now)
-        let items = [
-            (title: DateLogic.countdownTitle(for: .birthday, anniversaryNumber: 0), date: birthday),
-            (title: DateLogic.countdownTitle(for: .anniversary,
-                                             anniversaryNumber: DateLogic.anniversaryNumber(on: anniversary)),
-             date: anniversary),
-        ]
+        var items = [(title: DateLogic.countdownTitle(for: .birthday, anniversaryNumber: 0), date: birthday)]
+        if store.isAnniversaryDayPicked {
+            let anniversary = DateLogic.nextOccurrence(of: store.relationshipStart, from: now)
+            items.append((title: DateLogic.countdownTitle(for: .anniversary,
+                                                          anniversaryNumber: DateLogic.anniversaryNumber(on: anniversary)),
+                          date: anniversary))
+        }
         return items.sorted { $0.date < $1.date }
     }
 }
